@@ -1,5 +1,7 @@
 # File names inside a ZIP can be in a code page Python does not know about
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -9,6 +11,8 @@ Older tools write names in the local code page and do not set the UTF-8 flag. Py
 The snippet makes such an archive by writing a placeholder name and replacing its bytes with the Shift-JIS ones.
 
 ## Reproduce
+
+Snippet file: `zip-name-codepage.py`
 
 ```python
 import io, zipfile
@@ -36,3 +40,7 @@ repaired:      線形.dwg
 ## What to do
 
 If a name has non-ASCII letters and the UTF-8 flag is not set, try the code pages that are plausible for the source and take the one that decodes without error. Tell the user that the name was recovered by guess.
+
+## Sources
+
+- [ZIP APPNOTE, Appendix D](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT): the ZIP format historically supported only IBM Code Page 437 for names. If general purpose bit 11 is unset, the name and comment SHOULD conform to the original ZIP encoding. If it is set, they MUST be UTF-8.

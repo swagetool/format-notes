@@ -1,5 +1,7 @@
 # A polygon with all heights 0 or symmetric around 0 comes back from DXF flat
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 GDAL writes a polygon as a hatch, which carries a single elevation. Reading it back, a polygon whose Z values are all 0 loses its Z. So does one with Z of -1, 1, -1. A polygon at constant height 5 keeps it. The second case is consistent with the writer storing the mid-height between lowest and highest, which is 0 for -1 and 1, but we did not read the writer source to confirm that.
 
 ## Reproduce
+
+Snippet file: `flat-hatch-reads-without-height.py`
 
 ```python
 import os, tempfile
@@ -44,3 +48,8 @@ read:    POLYGON Z ((0 0 5,1 0 5,1 1 5,0 0 5))
 ## What to do
 
 If Z of polygons matters, check it after writing. A flat result for a polygon you wrote with a height of 0 is the same as a polygon that never had a height, so decide how you want to report that.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html): Polygon, Triangle and MultiPolygon features are written as HATCH entities by default. The page does not say how the elevation of a hatch is chosen or read back, so the explanation of the mid-height in this note stays a guess.
+- We did not find a GDAL issue about this.

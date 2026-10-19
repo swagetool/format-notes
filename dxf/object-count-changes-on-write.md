@@ -1,5 +1,7 @@
 # The DXF writer drops empty geometries and splits multipolygons
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -10,6 +12,8 @@ Two ways the count differs after writing to DXF.
 2. A multipolygon with three parts becomes three DXF entities, so one object is read back as three.
 
 ## Reproduce
+
+Snippet file: `object-count-changes-on-write-1.py`
 
 ```python
 import os, tempfile
@@ -36,6 +40,8 @@ POLYGON EMPTY                      CreateFeature returned 0
 POLYGON ((5 5, 6 5, 6 6, 5 5))     CreateFeature returned 0
 features written: 3, read back: 2
 ```
+
+Snippet file: `object-count-changes-on-write-2.py`
 
 ```python
 import os, tempfile
@@ -64,3 +70,8 @@ features written: 1, features read back: 3
 ## What to do
 
 Filter empty geometries yourself and say how many were left out. When you compare counts after a DXF round trip, expect more objects than you wrote for multi-part geometry and group the parts back by their source object.
+
+## Sources
+
+- No link. The [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html) describes neither the dropped empty geometry nor the split of a multipolygon into one entity per part. A DXF entity holds one polygon, which is why we file the split under the format. The dropped empty polygon is driver behaviour.
+- We did not find a GDAL issue about this.

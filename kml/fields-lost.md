@@ -1,5 +1,7 @@
 # KML loses fields in two situations
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -8,6 +10,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 2. Some field names collide with fields the reader adds on its own. Of the names written below, `timestamp`, `begin`, `end` and `visibility` returned no usable value, and `name` is listed as `Name`. Their values are in the file, but the reader fills those fields from KML elements instead. `visibility` also produces a warning about a failed integer parse.
 
 ## Reproduce
+
+Snippet file: `fields-lost-1.py`
 
 ```python
 import os, tempfile
@@ -41,6 +45,8 @@ Output, as printed (standard output first, then standard error):
 every value empty:      fields read back = []
 one value on one point: fields read back = ['height', 'note']
 ```
+
+Snippet file: `fields-lost-2.py`
 
 ```python
 import os, tempfile
@@ -85,3 +91,8 @@ street      written 'v_street' | read: 'v_street'
 ## What to do
 
 Rename the colliding fields on write and keep the mapping. For layers whose attributes are all empty, write one empty string into a text field of one feature, or tell the user the fields will not survive.
+
+## Sources
+
+- [GDAL LIBKML driver page](https://gdal.org/en/stable/drivers/vector/libkml.html): lists `LIBKML_TIMESTAMP_FIELD`, `LIBKML_BEGIN_FIELD`, `LIBKML_END_FIELD`, `LIBKML_VISIBILITY_FIELD` and `LIBKML_NAME_FIELD` with the defaults `timestamp`, `begin`, `end`, `visibility` and `name`, each mapped to the KML tag of that name. That documents effect 2. Effect 1 (all fields gone when no value is set) is not described.
+- [GDAL pull request 13591](https://github.com/OSGeo/gdal/pull/13591) (closes issue 13590): a related collision, a field named `ID` clashing with a core attribute, was fixed in January 2026 by adding the suffix 2 to the name. We did not test the fields of this note against that change.

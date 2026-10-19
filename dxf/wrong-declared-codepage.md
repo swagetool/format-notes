@@ -1,5 +1,7 @@
 # A DXF that declares ANSI_1250 but is written in UTF-8 reads as mojibake
 
+Kind: documented driver behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -9,6 +11,8 @@ GDAL trusts `$DWGCODEPAGE`. The file below declares `ANSI_1250` and holds UTF-8 
 The damage can be undone when it is reversible: encode the string back with the declared code page and decode it as UTF-8. If that raises an error, the bytes were not UTF-8 and the guess is wrong. Forcing the encoding with `DXF_ENCODING` also works, as the last line of the output shows.
 
 ## Reproduce
+
+Snippet file: `wrong-declared-codepage.py`
 
 ```python
 import os, tempfile
@@ -47,3 +51,8 @@ with DXF_ENCODING=UTF-8: Udostępniane granice terenów
 ## What to do
 
 Check non-ASCII layer names and text after reading. If they look like `Ä™` or `Ă³`, try the repair above before you classify or match anything by name.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html), section Character Encodings: "In some cases the $DWGCODEPAGE setting in a DXF file will be wrong, or unrecognised by OGR. In this case, DXF_ENCODING may be used to override what id will be used by OGR in transcoding."
+- We did not find a GDAL issue about this.

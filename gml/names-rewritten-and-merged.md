@@ -1,12 +1,16 @@
 # GML rewrites layer and field names and merges layers whose names become equal
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
 
-`road-a` and `road_a` are two layers. GML cannot have `-` in an element name, so `road-a` becomes `road_a`, and on reading there is one layer with 6 features. The field `max-speed` becomes `max_speed`. GDAL prints warnings at write time.
+`road-a` and `road_a` are two layers. GDAL rewrites `-` to `_` in names. Its warning says this is for XML validity, although XML 1.0 itself allows a hyphen inside a name (see Sources). So `road-a` becomes `road_a`, and on reading there is one layer with 6 features. The field `max-speed` becomes `max_speed`. GDAL prints warnings at write time.
 
 ## Reproduce
+
+Snippet file: `names-rewritten-and-merged.py`
 
 ```python
 import os, tempfile
@@ -47,3 +51,9 @@ XML element name.
 ## What to do
 
 Clean the names yourself before writing, to the set that the format accepts, and check that they are still unique afterwards.
+
+## Sources
+
+- No link for the renaming. The [GDAL GML driver page](https://gdal.org/en/stable/drivers/vector/gml.html) does not describe it. GDAL prints its own warning, quoted in the output above.
+- [XML 1.0, section 2.3](https://www.w3.org/TR/xml/#sec-common-syn): a hyphen is allowed inside a name, only not as its first character. So the rewrite of `road-a` is GDAL's own choice, whatever its warning says about XML validity.
+- We did not find a GDAL issue about this.

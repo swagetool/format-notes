@@ -1,0 +1,40 @@
+name: notes
+
+# Runs every snippet in the official GDAL images and compares what it prints
+# with the output stored in the note. A difference is information about another
+# GDAL version, so the job does not fail on it. It uploads a report instead.
+# Tags are pinned exactly: the last 3.8 release, the version the notes were
+# written on, and the newest release at the time of writing.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 1 * *"
+
+jobs:
+  snippets:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ghcr.io/osgeo/gdal:ubuntu-full-3.8.5
+          - ghcr.io/osgeo/gdal:ubuntu-full-3.10.3
+          - ghcr.io/osgeo/gdal:ubuntu-full-3.13.3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the snippets
+        run: |
+          mkdir -p out
+          docker run --rm -v "$PWD":/notes -w /notes ${{ matrix.image }} \
+            python3 ci/check_notes.py /notes/out/report.md
+      - name: Show the summary
+        run: head -n 8 out/report.md
+      - name: Name the report after the image
+        run: echo "REPORT_NAME=report-$(echo '${{ matrix.image }}' | sed 's/.*://')" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.REPORT_NAME }}
+          path: out/report.md

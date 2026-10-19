@@ -1,5 +1,7 @@
 # Shapefile cuts field names at 10 bytes, in the middle of a letter
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 The limit is bytes, not characters. `Название` (8 letters, 16 bytes in UTF-8) becomes `Назва`. `Ulica_główna` is cut after the first byte of `ó` and the result is a name with a broken byte. GDAL prints a warning about "laundered" names, which includes the broken one.
 
 ## Reproduce
+
+Snippet file: `field-name-10-bytes.py`
 
 ```python
 import os, tempfile
@@ -41,3 +45,8 @@ Warning 6: Normalized/laundered field name: 'street_name_long' to 'street_nam'
 ## What to do
 
 Shorten names yourself, on a letter boundary, and keep a table from the original name to the written one. Do not rely on GDAL's cut for any name that has non-ASCII letters.
+
+## Sources
+
+- [GDAL Shapefile driver page](https://gdal.org/en/stable/drivers/vector/shapefile.html), Creation Issues: "Attribute names can only be up to 10 characters long." Our run shows that the limit is counted in bytes. GDAL prints a warning for each renamed field, as shown above.
+- We did not find a GDAL issue about this.

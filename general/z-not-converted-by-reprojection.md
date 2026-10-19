@@ -1,5 +1,7 @@
 # Reprojecting from a feet-based 2D CRS leaves Z in feet
 
+Kind: PROJ behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -9,6 +11,8 @@ PROJ moves X and Y between two 2D coordinate systems and does not touch Z. If th
 PROJ does convert Z when the source CRS is a compound CRS that includes a vertical part, for example EPSG:3734+6360 (Ohio North in feet plus NAVD88 height in feet). The same 1000 then becomes 304.8006 metres.
 
 ## Reproduce
+
+Snippet file: `z-not-converted-by-reprojection.py`
 
 ```python
 from osgeo import osr
@@ -39,3 +43,8 @@ compound CRS (3734+6360) to 4979: Z 1000 -> 304.8006096012192
 ## What to do
 
 Do not infer the Z unit from the horizontal CRS. If the vertical unit matters, build the transform from a compound CRS and check the result on one real point. If you cannot know the vertical unit, say so in the output instead of converting by guess.
+
+## Sources
+
+- [PROJ mailing list, "ESRI:102655 - z-axis in meter insted of us-ft"](https://lists.osgeo.org/pipermail/proj/2020-June/009660.html): a PROJ maintainer answers that a projected 2D CRS has no Z axis, that the Z value PROJ returns is undefined and may or may not be changed, and that a compound CRS is needed when Z is an elevation tied to a vertical CRS.
+- We did not find a GDAL issue about this.

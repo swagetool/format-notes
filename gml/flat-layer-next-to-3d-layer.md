@@ -1,5 +1,7 @@
 # A GML file with one 3D layer cannot be read for its flat layers
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 The writer puts `srsDimension="3"` on the envelope of the whole file as soon as one layer has Z. The flat layer's own `posList` carries no dimension, and the reader then expects three values per vertex. The flat layer yields 0 features and the error "Did not get at least 3 values". The 3D layer reads normally.
 
 ## Reproduce
+
+Snippet file: `flat-layer-next-to-3d-layer.py`
 
 ```python
 import os, tempfile
@@ -40,3 +44,9 @@ tall features read: 1 | last error: none
 ## What to do
 
 Keep 2D and 3D layers in separate files. The error text offers `GML_SKIP_CORRUPTED_FEATURES`, which skips the objects and does not repair them.
+
+## Sources
+
+- [GDAL issue 6986](https://github.com/OSGeo/gdal/issues/6986) (closed by pull request 6998): the reader now uses `srsDimension` on the top `gml:Envelope` as the default for geometries that carry none. That explains the reader side of this note. The issue is about reading CityGML and does not mention the GML writer.
+- [GDAL GML driver page](https://gdal.org/en/stable/drivers/vector/gml.html): documents the `SRSDIMENSION_LOC` creation option and does not describe this combination.
+- We did not find an issue about the writer putting `srsDimension="3"` on the shared envelope while flat layers carry none.

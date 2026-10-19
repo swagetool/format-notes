@@ -1,5 +1,7 @@
 # MapInfo TAB drops the time zone of a DateTime and keeps the clock time
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 `2026-10-18 12:00:00+03` is read back as `2026/10/18 12:00:00`. The zone is gone and the hour is unchanged, so the instant is now wrong by three hours if anyone reads it as UTC. GeoPackage keeps `+03` in the same test. GDAL also prints a "non-conformant content" warning during the run, but it does not mention the zone being dropped.
 
 ## Reproduce
+
+Snippet file: `datetime-zone.py`
 
 ```python
 import os, tempfile
@@ -45,3 +49,8 @@ GPKG          2026/10/18 12:00:00+03
 ## What to do
 
 Convert DateTime fields to UTC before writing to MapInfo, or store the offset in a separate attribute.
+
+## Sources
+
+- No link. We found no MapInfo documentation or GDAL page that says the TAB format has no time zone. The note records what the files show.
+- We did not find a GDAL issue about this.

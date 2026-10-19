@@ -1,5 +1,7 @@
 # Control characters and U+FFFE in text values are changed or break the file
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -14,6 +16,8 @@ Three values were written into one text field of each format and read back. In t
 The snippet silences GDAL messages so the table stays short.
 
 ## Reproduce
+
+Snippet file: `special-characters.py`
 
 ```python
 import os, tempfile
@@ -60,3 +64,9 @@ GPKG     carriage return: kept | control char 0x01: kept | U+FFFE: kept
 ## What to do
 
 Remove control characters and U+FFFE from text before writing to XML formats. Read a sample back from the written file.
+
+## Sources
+
+- [XML 1.0, section 2.2 Characters](https://www.w3.org/TR/xml/#charsets): the allowed characters are #x9, #xA, #xD, #x20 to #xD7FF, #xE000 to #xFFFD and #x10000 to #x10FFFF. Control characters such as 0x01 and U+FFFE are not allowed in an XML document.
+- [XML 1.0, section 2.11 End-of-Line Handling](https://www.w3.org/TR/xml/#sec-line-ends): a processor translates #xD #xA and a lone #xD to a single #xA. That is why a carriage return comes back as a line feed from XML based formats.
+- We did not find a GDAL issue about this.

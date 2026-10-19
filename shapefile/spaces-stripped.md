@@ -1,5 +1,7 @@
 # Shapefile removes spaces from both ends of a text value
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 DBF pads fields to a fixed width with spaces, and the reader cannot tell padding from a real trailing space, so it strips on both sides. `" lead"` becomes `"lead"`. GeoPackage keeps all of it in the same test.
 
 ## Reproduce
+
+Snippet file: `spaces-stripped.py`
 
 ```python
 import os, tempfile
@@ -41,3 +45,8 @@ Output, as printed (standard output first, then standard error):
 ## What to do
 
 When you check a round trip, compare the values with `strip()` on both sides for Shapefile, or you will report differences that come from padding.
+
+## Sources
+
+- No link. The [GDAL Shapefile driver page](https://gdal.org/en/stable/drivers/vector/shapefile.html) does not mention this. The explanation in the note (fixed width padding) is our reading of the result.
+- We did not find a GDAL issue about this.

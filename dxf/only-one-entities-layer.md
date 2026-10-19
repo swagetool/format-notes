@@ -1,5 +1,7 @@
 # A DXF written by GDAL cannot hold more than one layer set
 
+Kind: documented driver behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 The second `CreateLayer` returns `None`. In a DXF the drawing layer is a field called `Layer`, so several GDAL layers have to be merged into one and the original set name has to go into that field.
 
 ## Reproduce
+
+Snippet file: `only-one-entities-layer.py`
 
 ```python
 import os, tempfile
@@ -33,3 +37,8 @@ GDAL says: Unable to have more than one OGR entities layer in a DXF file, with o
 ## What to do
 
 Write one OGR layer and fill the `Layer` attribute with the name of the set each object came from. Tell the user that sets were merged.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html), DXF Writer: "Only one OGR layer can be used to create the output file (but many DXF layers can be created)." The error text in the output above says the same.
+- We did not find a GDAL issue about this.

@@ -1,5 +1,7 @@
 # The plain KML driver takes features only into the layer created last
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -9,6 +11,8 @@ Three layers are created first and 5 features are written to each. The 10 featur
 The LIBKML driver took all 15 when we ran the same snippet with that driver name.
 
 ## Reproduce
+
+Snippet file: `layers-created-up-front.py`
 
 ```python
 import os, tempfile
@@ -50,3 +54,8 @@ ERROR 6: Interleaved feature adding to different layers is not supported
 ## What to do
 
 Create a layer, write all of its features, then create the next one. Check the return code of every `CreateFeature`.
+
+## Sources
+
+- The [GDAL KML driver page](https://gdal.org/en/stable/drivers/vector/kml.html) does not mention this limit. The error text printed by the driver is the only statement of it that we found.
+- We did not find a GDAL issue about this.

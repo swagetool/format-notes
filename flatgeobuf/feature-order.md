@@ -1,5 +1,7 @@
 # FlatGeobuf returns features in spatial-index order, not in write order
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 Five points written in the order 0 to 4 are read back as 3, 1, 2, 4, 0. Comparing by position in the file reports a difference for nearly every object.
 
 ## Reproduce
+
+Snippet file: `feature-order.py`
 
 ```python
 import os, tempfile
@@ -39,3 +43,9 @@ read order:    [3, 1, 2, 4, 0]
 ## What to do
 
 Write a key attribute and match objects by it. Do not promise the user an unchanged order.
+
+## Sources
+
+- [FlatGeobuf README](https://github.com/flatgeobuf/flatgeobuf): the format is built "to be able to cluster the data on a packed Hilbert R-Tree". The README does not state the resulting order in so many words.
+- [GDAL FlatGeobuf driver page](https://gdal.org/en/stable/drivers/vector/flatgeobuf.html): `SPATIAL_INDEX` defaults to YES.
+- We did not find a GDAL issue about this.

@@ -1,4 +1,6 @@
-# GeoPackage silently loses a field named fid or geom
+# GeoPackage does not keep a field named fid or geom
+
+Kind: format limit
 
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 A text field called `fid` or `geom` is not created. GDAL prints an error, the objects are still written, and the values of that field are gone. An integer field called `fid` is used as the feature id, so a repeated value (1, 1, 2) makes one insert fail with "UNIQUE constraint failed" and the object is lost: three written, two read back.
 
 ## Reproduce
+
+Snippet file: `fid-and-geom-field-names.py`
 
 ```python
 import os, tempfile
@@ -64,3 +68,8 @@ ERROR 1: Invalid index : -1
 ## What to do
 
 Rename these fields before the write and keep the mapping. Check the return codes of `CreateField` and `CreateFeature`.
+
+## Sources
+
+- [GDAL GeoPackage driver page](https://gdal.org/en/stable/drivers/vector/gpkg.html): `FID` "Defaults to fid. Column name to use for the OGR FID (primary key in the SQLite database)." `GEOMETRY_NAME` "Defaults to geom." Both are columns of the same table as the fields, so a field of the same name collides with them. The page does not say what happens then.
+- We did not find a GDAL issue about this.

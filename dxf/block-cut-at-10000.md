@@ -1,5 +1,7 @@
 # GDAL stops reading a DXF block after 10 000 entities
 
+Kind: documented driver behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 An INSERT of a block with 12 000 lines comes back as a collection of 10 000 parts. GDAL prints one warning and carries on. The warning names the switch `DXF_FEATURE_LIMIT_PER_BLOCK`. Nothing marks the object as cut, so anything that only looks at the returned objects will take it as complete.
 
 ## Reproduce
+
+Snippet file: `block-cut-at-10000.py`
 
 ```python
 import os, tempfile
@@ -48,3 +52,8 @@ lines in the block: 12000 | parts GDAL returned: 10000
 ## What to do
 
 Count entities inside block definitions on your own and compare. The message suggests setting `DXF_FEATURE_LIMIT_PER_BLOCK` higher, or to -1 for no limit. We did not run that variant here.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html): the option `DXF_FEATURE_LIMIT_PER_BLOCK` is listed under INSERT as "Defaults to 10000. Maximum number of features inserted from a single block. Set to -1 for no limit."
+- We did not find a GDAL issue about this.

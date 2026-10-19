@@ -1,5 +1,7 @@
 # KML turns a 64-bit integer into a string and trims the trailing space
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 An `Integer64` field with 220 is read back as a `String` with `'220'`. A text value `'264 DIVER '` is written with its space (the file shows it) and read back without it. Both changes happen when the file is read. They were seen with the LIBKML driver.
 
 ## Reproduce
+
+Snippet file: `int64-becomes-string.py`
 
 ```python
 import os, tempfile
@@ -48,3 +52,8 @@ values read: '220' '264 DIVER'
 ## What to do
 
 Convert numbers when you read KML and do not count the missing space as a write error.
+
+## Sources
+
+- [KML reference, Schema](https://developers.google.com/kml/documentation/kmlreference): the type of a `SimpleField` is one of string, int, uint, short, ushort, float, double and bool. There is no 64-bit type. The trailing space is not covered by the reference.
+- We did not find a GDAL issue about this.

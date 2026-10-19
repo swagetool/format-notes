@@ -1,5 +1,7 @@
 # Shapefile text fields hold 254 bytes, not 254 characters
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 A 300-letter Latin string is cut to 254. A 200-letter Cyrillic string, which is 400 bytes in UTF-8, is cut to 127 letters, the largest number that fits in 254 bytes. GDAL does warn about the cut, the snippet silences it.
 
 ## Reproduce
+
+Snippet file: `text-limit-254-bytes.py`
 
 ```python
 import os, tempfile
@@ -45,3 +49,8 @@ cyrillic written: 200 chars, 400 bytes | read: 127 chars, 254 bytes
 ## What to do
 
 Measure text in the encoding you write. Warn before the write about the objects that will be cut, or choose a format without this limit.
+
+## Sources
+
+- [GDAL Shapefile driver page](https://gdal.org/en/stable/drivers/vector/shapefile.html), Field sizes: the driver auto-extends string and integer fields "up to the 255 bytes limit imposed by the DBF format". Creation Issues: strings longer than the field width "will suffer truncation". The page says 255 and our snippet found 254 usable, and it does not say that the limit counts bytes.
+- We did not find a GDAL issue about this.

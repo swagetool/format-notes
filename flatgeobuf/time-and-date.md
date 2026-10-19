@@ -1,5 +1,7 @@
 # FlatGeobuf turns Date into DateTime and loses Time
 
+Kind: format limit
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 A `Date` field is read back as `DateTime` (`2026/10/18 00:00:00`). A `Time` field is read back as `DateTime` too, and the value is empty.
 
 ## Reproduce
+
+Snippet file: `time-and-date.py`
 
 ```python
 import os, tempfile
@@ -44,3 +48,8 @@ read:    d = 2026/10/18 00:00:00 | t =
 ## What to do
 
 Store time of day as text or as seconds. Treat the date type change as a change of type in your report.
+
+## Sources
+
+- [FlatGeobuf header.fbs](https://github.com/flatgeobuf/flatgeobuf/blob/master/src/fbs/header.fbs): the column types are Byte, UByte, Bool, Short, UShort, Int, UInt, Long, ULong, Float, Double, String, Json, DateTime and Binary. There is no Date and no Time type.
+- We did not find a GDAL issue about this.

@@ -1,5 +1,7 @@
 # Shapefile written without an encoding stores non-Latin text as question marks
 
+Kind: documented driver behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 By default the driver writes Latin-1. Cyrillic letters become `?`. The loss is in the file and cannot be undone. GDAL prints one warning at write time. With `ENCODING=UTF-8` a `.cpg` file is created and the text is intact.
 
 ## Reproduce
+
+Snippet file: `no-cpg-question-marks.py`
 
 ```python
 import os, tempfile
@@ -42,3 +46,9 @@ options: ['ENCODING=UTF-8'] | files: ['t.cpg', 't.dbf', 't.shp', 't.shx']
 ## What to do
 
 Always pass `ENCODING=UTF-8` (or another explicit encoding) when creating a Shapefile, and ship the `.cpg`.
+
+## Sources
+
+- [GDAL Shapefile driver page](https://gdal.org/en/stable/drivers/vector/shapefile.html), Layer creation options: `ENCODING` "Set the encoding value in the DBF file. The default value is "LDID/87"." In the Encoding section: "LDID "87 / 0x57" is treated as ISO-8859-1 which may not be appropriate."
+- GDAL warns once when a character cannot be converted, as the output above shows.
+- We did not find a GDAL issue about this.

@@ -1,5 +1,7 @@
 # GDAL loses the last character of DXF text under ANSI_1255 and ANSI_1258
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 With `$DWGCODEPAGE` set to `ANSI_1255` (Hebrew) the last letter of a text value is dropped. With `ANSI_1258` (Vietnamese) the same happens even to plain ASCII: `Ha Noi` comes back as `Ha No`. `ANSI_1252` is fine. Setting `DXF_ENCODING` to the same page does not help. GDAL prints no message.
 
 ## Reproduce
+
+Snippet file: `hebrew-and-vietnamese-last-letter.py`
 
 ```python
 import os, tempfile
@@ -51,3 +55,8 @@ DXF_ENCODING=CP1258: 'Ha No'
 ## What to do
 
 Do not write these two pages. When reading, expect the last character to be missing and compare a known value. Converting the file text to UTF-8 yourself before GDAL opens it should avoid the loss, but we have not tested that here.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html), section Character Encodings: describes `$DWGCODEPAGE` and `DXF_ENCODING` (an iconv name). It says nothing about dropped characters.
+- We did not find a GDAL issue about this.

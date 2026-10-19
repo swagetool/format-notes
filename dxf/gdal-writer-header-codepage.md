@@ -1,5 +1,7 @@
 # The GDAL DXF writer writes UTF-8 text under an ANSI_1252 header
 
+Kind: driver bug
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
@@ -7,6 +9,8 @@ Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 Writing `Łódź` as a layer name produces a file that says `ANSI_1252` in the header while the name is stored as UTF-8 bytes. Reading the same file with GDAL gives `ÅÃ³dÅº`. The file is wrong on its own, so any reader that trusts the header will do the same.
 
 ## Reproduce
+
+Snippet file: `gdal-writer-header-codepage.py`
 
 ```python
 import os, re, tempfile
@@ -41,3 +45,8 @@ GDAL reads back: ÅÃ³dÅº
 ## What to do
 
 After writing a DXF with non-Latin or accented text, read it back and compare. If you need such text to survive, re-encode the finished file into one ANSI code page that contains all the letters and keep the header in line with it. Letters outside the page need an escape such as `\U+0141`.
+
+## Sources
+
+- [GDAL DXF driver page](https://gdal.org/en/stable/drivers/vector/dxf.html), section Character Encodings: "GDAL/OGR attempts to translate this to UTF-8 when reading and back into ANSI_1252 when writing." Our run shows UTF-8 bytes under an `ANSI_1252` header, which is not what that sentence describes.
+- We did not find a GDAL issue about this.

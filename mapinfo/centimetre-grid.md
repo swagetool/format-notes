@@ -1,12 +1,16 @@
 # MapInfo TAB moves coordinates by up to about a centimetre
 
+Kind: documented driver behaviour
+
 Checked on GDAL 3.10.3, PROJ 9.6.0, Python 3.13.5.
 
 ## What happens
 
-2000 random points in a UTM range were written to a MapInfo table and read back. The largest shift was 0.0099 with a CRS (EPSG:32610) and 0.0150 without one. No message appears. The file opens, the points are where you expect them, and only a comparison of numbers shows it.
+2000 random points in a UTM range were written to a MapInfo table and read back. The largest shift was 0.0099 with a CRS (EPSG:32610) and 0.0150 without one. GDAL prints no message about the shift (the two warnings in the output are about a dummy column). The file opens, the points are where you expect them, and only a comparison of numbers shows it.
 
 ## Reproduce
+
+Snippet file: `centimetre-grid.py`
 
 ```python
 import os, random, tempfile
@@ -53,3 +57,9 @@ Warning 5: MapInfo tables must contain at least 1 column, adding dummy FID colum
 ## What to do
 
 Compare coordinates after a MapInfo round trip with a tolerance of about 2 cm, and print the largest shift instead of a yes/no. Always write the CRS, because leaving it out made the shift larger here.
+
+## Sources
+
+- [GDAL MapInfo driver page](https://gdal.org/en/stable/drivers/vector/mitab.html), Creation Issues: "The TAB File format requires that the bounds (geographical extents) of a new file be set before writing the first feature." For a projection other than lat/lon the default bounds are (-30000000 + false_easting, -15000000 + false_northing) to (30000000 + false_easting, 15000000 + false_northing). The `BOUNDS` layer creation option is described as "Define custom layer bounds to increase the accuracy of the coordinates."
+- The page does not give the size of the shift. The numbers in this note are what we measured.
+- We did not find a GDAL issue about this.
