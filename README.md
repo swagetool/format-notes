@@ -21,6 +21,7 @@ Every note starts with a `Kind:` line, so you can see whose behaviour it is:
 - `format limit`: the format itself cannot hold it.
 - `documented driver behaviour`: a GDAL driver page describes it.
 - `driver bug`: GDAL 3.10.3 does something its own documentation or its own message does not account for. Some notes carry this label for an undocumented limitation of a driver, and say so in the Sources section.
+- `undocumented driver behaviour`: the driver page does not mention it, and it is not clearly a bug. Linux telling letter case apart in file names is an example.
 - `PROJ behaviour`: it comes from PROJ.
 
 Each note ends with a Sources section. A link is there only where the page says what the note claims. Where we found no page or issue, the note says that.
@@ -55,19 +56,29 @@ Each note ends with a Sources section. A link is there only where the page says 
 28. [FlatGeobuf turns Date into DateTime and loses Time](flatgeobuf/time-and-date.md)
 29. [GDAL gives a GeoJSON without a CRS the CRS EPSG:4326, or EPSG:4979 if any point has Z](geojson/reader-assigns-a-crs.md)
 30. [File names inside a ZIP can be in a code page Python does not know about](general/zip-name-codepage.md)
+31. [File Geodatabase in its default layout breaks a time of day and changes four other value types](filegdb/default-layout-types.md)
+32. [File Geodatabase gives a date and time without a zone the zone UTC](filegdb/time-without-zone-marked-utc.md)
+33. [File Geodatabase stores coordinates on a grid and moves a vertex by up to half a step](filegdb/coordinate-grid.md)
+34. [A DXF hatch with several separate boundaries is read as one polygon with holes outside it](dxf/hatch-boundaries-merge-into-one-polygon.md)
+35. [GDAL ignores the GML attribute-fields option once it has written a .gfs file](gml/gfs-file-hides-attribute-fields.md)
+36. [An ISO 19139 metadata file opens as GML with no layers](gml/iso-19139-metadata-opens-as-gml.md)
+37. [MIF writes a newline in a value as backslash and n, and reads it back that way](mapinfo/mif-newline-in-value.md)
+38. [A MIF table with no fields is written and cannot be opened](mapinfo/mif-table-without-fields.md)
+39. [A Shapefile .prj with a different letter case is not found on Linux](shapefile/prj-name-case-on-linux.md)
 
 ## What each format loses or changes
 
 | Format | What changes | Notes |
 |---|---|---|
-| Shapefile | field names cut at 10 bytes, text cut at 254 bytes, non-Latin text becomes `?` without an encoding, spaces removed at both ends, flat objects get Z = 0 in a 3D layer | [names](shapefile/field-name-10-bytes.md), [text](shapefile/text-limit-254-bytes.md), [encoding](shapefile/no-cpg-question-marks.md), [spaces](shapefile/spaces-stripped.md), [Z = 0](shapefile/flat-feature-gets-z-zero.md) |
-| MapInfo TAB | Z dropped, coordinates move by up to about a centimetre, time zone of DateTime dropped | [Z](mapinfo/no-height.md), [grid](mapinfo/centimetre-grid.md), [zone](mapinfo/datetime-zone.md) |
+| Shapefile | field names cut at 10 bytes, text cut at 254 bytes, non-Latin text becomes `?` without an encoding, spaces removed at both ends, flat objects get Z = 0 in a 3D layer, a `.prj` with another letter case is not found on Linux | [names](shapefile/field-name-10-bytes.md), [text](shapefile/text-limit-254-bytes.md), [encoding](shapefile/no-cpg-question-marks.md), [spaces](shapefile/spaces-stripped.md), [Z = 0](shapefile/flat-feature-gets-z-zero.md), [.prj case](shapefile/prj-name-case-on-linux.md) |
+| MapInfo TAB | Z dropped, coordinates move by up to about a centimetre, time zone of DateTime dropped, MIF: newline in a value comes back as backslash and n, a table with no fields cannot be opened | [Z](mapinfo/no-height.md), [grid](mapinfo/centimetre-grid.md), [zone](mapinfo/datetime-zone.md), [MIF newline](mapinfo/mif-newline-in-value.md), [MIF no fields](mapinfo/mif-table-without-fields.md) |
 | KML | fields lost when all are empty or when a name is one the reader uses, features lost in layers created up front (plain KML driver), foreign coordinates wrapped, 64-bit integer becomes a string | [fields](kml/fields-lost.md), [layers](kml/layers-created-up-front.md), [coordinates](kml/foreign-coordinates.md), [Int64](kml/int64-becomes-string.md) |
-| GML | file unreadable for flat layers next to a 3D layer, names rewritten and layers merged, empty string read as NULL | [3D](gml/flat-layer-next-to-3d-layer.md), [names](gml/names-rewritten-and-merged.md), [empty string](general/empty-string-and-null.md) |
-| DXF | text cut at 256 characters, wrong or ignored code page, last character lost on two code pages, block cut at 10 000 entities, empty geometry dropped and multipolygon split, polygon with Z around 0 read flat, one layer set only | [text](dxf/text-longer-than-256-characters.md), [declared page](dxf/wrong-declared-codepage.md), [writer header](dxf/gdal-writer-header-codepage.md), [1255 and 1258](dxf/hebrew-and-vietnamese-last-letter.md), [block](dxf/block-cut-at-10000.md), [counts](dxf/object-count-changes-on-write.md), [hatch](dxf/flat-hatch-reads-without-height.md), [layers](dxf/only-one-entities-layer.md) |
+| GML | file unreadable for flat layers next to a 3D layer, names rewritten and layers merged, empty string read as NULL, attribute fields hidden by a .gfs file, metadata XML opens with no layers | [3D](gml/flat-layer-next-to-3d-layer.md), [names](gml/names-rewritten-and-merged.md), [empty string](general/empty-string-and-null.md), [.gfs](gml/gfs-file-hides-attribute-fields.md), [metadata](gml/iso-19139-metadata-opens-as-gml.md) |
+| DXF | text cut at 256 characters, wrong or ignored code page, last character lost on two code pages, block cut at 10 000 entities, empty geometry dropped and multipolygon split, polygon with Z around 0 read flat, one layer set only, hatch with several boundaries read as one polygon with holes | [text](dxf/text-longer-than-256-characters.md), [declared page](dxf/wrong-declared-codepage.md), [writer header](dxf/gdal-writer-header-codepage.md), [1255 and 1258](dxf/hebrew-and-vietnamese-last-letter.md), [block](dxf/block-cut-at-10000.md), [counts](dxf/object-count-changes-on-write.md), [hatch](dxf/flat-hatch-reads-without-height.md), [layers](dxf/only-one-entities-layer.md), [hatch boundaries](dxf/hatch-boundaries-merge-into-one-polygon.md) |
 | GeoPackage | field named `fid` or `geom` not kept, a repeated integer `fid` loses an object | [fid and geom](gpkg/fid-and-geom-field-names.md) |
 | FlatGeobuf | feature order changes, Date becomes DateTime, Time lost | [order](flatgeobuf/feature-order.md), [types](flatgeobuf/time-and-date.md) |
 | GeoJSON | a CRS that nobody wrote is reported on reading | [CRS](geojson/reader-assigns-a-crs.md) |
+| File Geodatabase | in the default layout a 64-bit integer becomes a real, a time of day is lost, a zoned time is moved to UTC, a fraction of a second is cut, a time without a zone comes back marked UTC, coordinates move to a grid of 0.0001 unit or 0.000000001 degree | [layout](filegdb/default-layout-types.md), [UTC](filegdb/time-without-zone-marked-utc.md), [grid](filegdb/coordinate-grid.md) |
 | Several | empty string against NULL, control characters, carriage return and U+FFFE in text | [empty string](general/empty-string-and-null.md), [special characters](general/special-characters.md) |
 | Not a format | Z stays in feet when a 2D CRS is reprojected (PROJ), file names in a ZIP in another code page | [Z](general/z-not-converted-by-reprojection.md), [ZIP](general/zip-name-codepage.md) |
 
